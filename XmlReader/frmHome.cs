@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using System.Text;
+using System.Windows.Forms.Design;
 using System.Xml.Serialization;
+using XmlReader.Extensions;
 using XmlReader.Models.NfeXml;
 
 namespace XmlReader
@@ -88,8 +90,12 @@ namespace XmlReader
             this.Update();
 
             string pastaErros = Path.Combine(caminhoDaPasta, "Erros", DateTime.Now.ToString("yyyy-MM-dd"));
+            string pastaSucesso = Path.Combine(caminhoDaPasta, "Sucessos", DateTime.Now.ToString("yyyy-MM-dd"));
+            string pastaQuimicos = Path.Combine(caminhoDaPasta, "Quimicos", DateTime.Now.ToString("yyyy-MM-dd"));
 
             Directory.CreateDirectory(pastaErros);
+            Directory.CreateDirectory(pastaSucesso);
+            Directory.CreateDirectory(pastaQuimicos);
 
             string[] arquivosXml = Directory.GetFiles(caminhoDaPasta, "*.xml");
             int arquivosProcessados = 0;
@@ -169,6 +175,35 @@ namespace XmlReader
                 }
             }
 
+            var grupoDeNotas = listaAgregada
+                .GroupBy(g => new { g.IdNota, g.FileName })
+                .Select(s => new
+                {
+                    Chave = s.Key.IdNota,
+                    FileName = s.Key.FileName,
+                    Arquivos = s.ToList(),
+                    IsQuimico = s.Any(i => i.IsQuimico)
+                })
+                .ToList();
+
+            if(grupoDeNotas != null && grupoDeNotas.Any())
+            {
+                foreach(var nota in grupoDeNotas)
+                {
+                    var arquivoDeNotas = FileExtensions.GetFiles(Path.GetDirectoryName(nota.FileName) ?? "", "*.xml|*.pdf", nota.Chave.Replace("NFe", ""));
+
+                    if (nota.IsQuimico)
+                    {
+                        FileExtensions.CopyFilesToFolder(arquivoDeNotas, pastaQuimicos);
+                    }
+                    else
+                    {
+                        FileExtensions.CopyFilesToFolder(arquivoDeNotas, pastaSucesso);
+                    }
+                }
+            }
+
+
             if (listaAgregada.Count > 0)
             {
                 var bindingList = new BindingList<NotaFiscalItem>(listaAgregada);
@@ -231,6 +266,8 @@ namespace XmlReader
                             string cnpjFormatado = FormatarCnpj(item.CnpjCliente);
                             sb.AppendLine($"{item.NumeroNota};\"{item.IdNota}\";\"{nomeCliente}\";\"{cnpjFormatado}\";\"{descricaoProduto}\";{item.NcmProduto};{item.IsQuimico}");
                         }
+
+
 
                         File.WriteAllText(sfd.FileName, sb.ToString(), Encoding.UTF8);
                         MessageBox.Show($"Arquivo CSV salvo com sucesso em:\n{sfd.FileName}", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
