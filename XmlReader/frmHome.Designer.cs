@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmHome));
             btnSelectFolder = new Button();
             txtFolderPath = new TextBox();
             lblStatus = new Label();
@@ -277,10 +278,11 @@
             BackColor = Color.FromArgb(46, 80, 159);
             ClientSize = new Size(830, 537);
             Controls.Add(panel1);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "frmHome";
             Padding = new Padding(6);
             StartPosition = FormStartPosition.CenterScreen;
-            Text = "Form1";
+            Text = "XML Audit - Home";
             Load += frmHome_Load;
             ((System.ComponentModel.ISupportInitialize)dgvResults).EndInit();
             panel1.ResumeLayout(false);
