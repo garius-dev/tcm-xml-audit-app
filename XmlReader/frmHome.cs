@@ -176,13 +176,14 @@ namespace XmlReader
             }
 
             var grupoDeNotas = listaAgregada
-                .GroupBy(g => new { g.IdNota, g.FileName })
+                .GroupBy(g => new { g.IdNota, g.FileName, g.NumeroNota })
                 .Select(s => new
                 {
                     Chave = s.Key.IdNota,
                     FileName = s.Key.FileName,
                     Arquivos = s.ToList(),
-                    IsQuimico = s.Any(i => i.IsQuimico)
+                    IsQuimico = s.Any(i => i.IsQuimico),
+                    NumeroNota = s.Key.NumeroNota
                 })
                 .ToList();
 
@@ -194,11 +195,11 @@ namespace XmlReader
 
                     if (nota.IsQuimico)
                     {
-                        FileExtensions.CopyFilesToFolder(arquivoDeNotas, pastaQuimicos);
+                        FileExtensions.CopyFilesToFolder(arquivoDeNotas, pastaQuimicos, nota.NumeroNota.ToString());
                     }
                     else
                     {
-                        FileExtensions.CopyFilesToFolder(arquivoDeNotas, pastaSucesso);
+                        FileExtensions.CopyFilesToFolder(arquivoDeNotas, pastaSucesso, nota.NumeroNota.ToString());
                     }
                 }
             }

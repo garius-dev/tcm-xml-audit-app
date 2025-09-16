@@ -8,7 +8,7 @@ namespace XmlReader.Extensions
 {
     public static class FileExtensions
     {
-        public static void CopyFileReplacingIfExists(string sourcePath, string destinationFolder)
+        public static void CopyFileReplacingIfExists(string sourcePath, string destinationFolder, string? renameAs)
         {
             if (string.IsNullOrWhiteSpace(sourcePath) || string.IsNullOrWhiteSpace(destinationFolder))
             {
@@ -34,6 +34,12 @@ namespace XmlReader.Extensions
                 string fileName = Path.GetFileName(sourcePath);
                 string destinationPath = Path.Combine(destinationFolder, fileName);
 
+                if(!string.IsNullOrWhiteSpace(renameAs))
+                {
+                    string extension = Path.GetExtension(fileName);
+                    destinationPath = Path.Combine(destinationFolder, renameAs + extension);
+                }
+
                 if (File.Exists(destinationPath))
                 {
                     File.Delete(destinationPath);
@@ -57,7 +63,7 @@ namespace XmlReader.Extensions
             }
         }
 
-        public static void CopyFilesToFolder(List<FileInfo> files, string destinationFolder)
+        public static void CopyFilesToFolder(List<FileInfo> files, string destinationFolder, string? renameAs = null)
         {
             if(files == null || files.Count == 0)
             {
@@ -67,7 +73,7 @@ namespace XmlReader.Extensions
 
             foreach(var file in files)
             {
-                CopyFileReplacingIfExists(file.FullName, destinationFolder);
+                CopyFileReplacingIfExists(file.FullName, destinationFolder, renameAs);
             }
         }
 
